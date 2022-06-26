@@ -22,6 +22,7 @@ enum Spec {
 }
 
 enum Race {
+    reserved 9,10;
     RaceUnknown = 0;
     RaceBloodElf = 1;
     RaceDraenei = 2;
@@ -31,9 +32,8 @@ enum Race {
     RaceNightElf = 6;
     RaceOrc = 7;
     RaceTauren = 8;
-    RaceTroll10 = 9;
-    RaceTroll30 = 10;
     RaceUndead = 11;
+    RaceTroll = 12;
 }
 
 enum ShattrathFaction {

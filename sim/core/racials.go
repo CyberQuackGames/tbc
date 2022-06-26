@@ -145,7 +145,7 @@ func applyRaceEffects(agent Agent) {
 				return health * 1.05
 			},
 		})
-	case proto.Race_RaceTroll10, proto.Race_RaceTroll30:
+	case proto.Race_RaceTroll:
 		// Bow specialization (+1% ranged crit when using a bow).
 		if weapon := character.Equip[proto.ItemSlot_ItemSlotRanged]; weapon.ID != 0 {
 			if weapon.RangedWeaponType == proto.RangedWeaponType_RangedWeaponTypeBow {
@@ -159,28 +159,10 @@ func applyRaceEffects(agent Agent) {
 		}
 
 		// Berserking
-		hasteBonus := 1.1
-		if character.Race == proto.Race_RaceTroll30 {
-			hasteBonus = 1.3
-		}
+		hasteBonus := 1.2
 		inverseBonus := 1 / hasteBonus
 
-		var resourceType stats.Stat
-		var cost float64
-		var actionID ActionID
-		if character.Class == proto.Class_ClassRogue {
-			resourceType = stats.Energy
-			cost = 10
-			actionID = ActionID{SpellID: 26297}
-		} else if character.Class == proto.Class_ClassWarrior {
-			resourceType = stats.Rage
-			cost = 5
-			actionID = ActionID{SpellID: 26296}
-		} else {
-			resourceType = stats.Mana
-			cost = character.BaseMana() * 0.06
-			actionID = ActionID{SpellID: 20554}
-		}
+		var actionID = ActionID{SpellID: 26297}
 
 		berserkingAura := character.RegisterAura(Aura{
 			Label:    "Berserking",
@@ -199,13 +181,7 @@ func applyRaceEffects(agent Agent) {
 		berserkingSpell := character.RegisterSpell(SpellConfig{
 			ActionID: actionID,
 
-			ResourceType: resourceType,
-			BaseCost:     cost,
-
 			Cast: CastConfig{
-				DefaultCast: Cast{
-					Cost: cost,
-				},
 				CD: Cooldown{
 					Timer:    character.NewTimer(),
 					Duration: time.Minute * 3,
@@ -220,15 +196,6 @@ func applyRaceEffects(agent Agent) {
 		character.AddMajorCooldown(MajorCooldown{
 			Spell: berserkingSpell,
 			Type:  CooldownTypeDPS,
-			CanActivate: func(sim *Simulation, character *Character) bool {
-				if character.Class == proto.Class_ClassRogue {
-					return character.CurrentEnergy() >= cost
-				} else if character.Class == proto.Class_ClassWarrior {
-					return character.CurrentRage() >= cost
-				} else {
-					return character.CurrentMana() >= cost
-				}
-			},
 		})
 	case proto.Race_RaceUndead:
 		character.AddStat(stats.ShadowResistance, 10)
